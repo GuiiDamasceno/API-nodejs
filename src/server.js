@@ -1,16 +1,23 @@
 require("express-async-errors")
+require("dotenv/config")
+
 const AppError = require("./utils/AppError")
 const migrationsRun = require("./database/sqlite/migrations")
+const uploadConfig = require("./configs/upload")
 
-const express = require("express"); // Importação do express
+const cors = require("cors")
+const express = require("express")
 const routes = require("./routes")
 
-migrationsRun() // executar o banco de dados
+migrationsRun()
 
-const app = express() // inicialização do Express
+const app = express()
+app.use(cors())
 app.use(express.json())
 
-app.use(routes) // a aplicação chega aqui e nos leva ao routes que está em index.js
+app.use("/files", express.static(uploadConfig.UPLOADS_FOLDER))
+
+app.use(routes)
 
 
 app.use((error, request, response, next) => {
@@ -29,6 +36,6 @@ app.use((error, request, response, next) => {
     })
 })
 
-const PORT = 3333; // definição qual o endereço do número da porta que a API vai observar
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server is running on Port ${PORT}`))
-// Ao início a mensagem é executada ao usar o npm start
+
